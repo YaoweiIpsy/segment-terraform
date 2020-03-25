@@ -8,14 +8,12 @@ import (
 
 func (client *Client) ListSources(pageToken string) (Sources, error) {
 	request := Request{
-		client:   client,
-		endpoint: "workspaces/" + client.workspace + "/sources",
+		endpoint: "sources",
 		result:   new(Sources),
 	}
-	if len(pageToken) > 5 {
-		request.params = &map[string]string{"page_token": pageToken}
-	}
-	return *request.result.(*Sources), request.Do()
+	request.params = &map[string]string{"page_token": pageToken}
+
+	return *request.result.(*Sources), request.Do(client)
 }
 
 func (client *Client) ListAllSources() ([]Source, error) {
@@ -37,18 +35,22 @@ func (client *Client) ListAllSources() ([]Source, error) {
 }
 func (client *Client) GetSource(name string) (Source, error) {
 	request := Request{
-		client:   client,
-		endpoint: "workspaces/" + client.workspace + "/sources/" + name,
+		endpoint: "sources/" + name,
 		result:   new(Source),
 	}
-	return *request.result.(*Source), request.Do()
+	return *request.result.(*Source), request.Do(client)
 }
-func (client *Client) CreateSource(name string, catalog string) (Source, error) {
+func (client *Client) CreateSource(name string, catalog string, isDev bool) (Source, error) {
 	if !strings.HasPrefix(name, "workspaces") {
 		name = fmt.Sprintf("workspaces/%s/sources/%s", client.workspace, name)
 	}
+	var labels map[string]string
+	if isDev {
+		labels = map[string]string{"environment": "dev"}
+	} else {
+		labels = map[string]string{"environment": "prod"}
+	}
 	request := Request{
-		client: client,
 		method: http.MethodPost,
 		body: struct {
 			Source Source `json:"source,omitempty"`
@@ -56,13 +58,13 @@ func (client *Client) CreateSource(name string, catalog string) (Source, error) 
 			Source{
 				Name:        name,
 				CatalogName: catalog,
+				Labels:      labels,
 			},
 		},
-		result: new(Source),
+		endpoint: "sources",
+		result:   new(Source),
 	}
-
-	return *request.result.(*Source), request.Do()
-
+	return *request.result.(*Source), request.Do(client)
 }
 func (client *Client) DeleteSource(name string) error {
 	if !strings.HasPrefix(name, "workspaces") {
@@ -70,9 +72,8 @@ func (client *Client) DeleteSource(name string) error {
 	}
 
 	request := Request{
-		client:   client,
 		endpoint: name,
 		method:   http.MethodDelete,
 	}
-	return request.Do()
+	return request.Do(client)
 }

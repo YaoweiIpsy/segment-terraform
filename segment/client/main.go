@@ -24,7 +24,6 @@ func NewClient(accessToken string, workspace string) *Client {
 }
 
 type Request struct {
-	client   *Client
 	endpoint string
 	params   *map[string]string
 	body     interface{}
@@ -32,7 +31,7 @@ type Request struct {
 	method   string
 }
 
-func (request *Request) Do() error {
+func (request *Request) Do(client *Client) error {
 	body := bytes.NewBuffer(nil)
 	if request.body != nil {
 		enc := json.NewEncoder(body)
@@ -40,9 +39,12 @@ func (request *Request) Do() error {
 			return err
 		}
 	}
+	if !strings.HasPrefix(request.endpoint, "workspaces/") {
+		request.endpoint = fmt.Sprintf("workspaces/%s/%s", client.workspace, strings.Trim(request.endpoint, "/"))
+	}
 	req, err := http.NewRequest(
 		request.method,
-		request.client.url+"/"+strings.Trim(request.endpoint, "/"),
+		fmt.Sprintf("%s/%s", client.url, strings.Trim(request.endpoint, "/")),
 		body)
 	if err != nil {
 		return err
@@ -55,7 +57,7 @@ func (request *Request) Do() error {
 		req.URL.RawQuery = q.Encode()
 	}
 
-	req.Header.Set("Authorization", "Bearer "+request.client.accessToken)
+	req.Header.Set("Authorization", "Bearer "+client.accessToken)
 	req.Header.Set("Content-Type", "application/json")
 	println(req.URL.String())
 	resp, err := http.DefaultClient.Do(req)

@@ -18,12 +18,13 @@ type Sources struct {
 
 // Source defines the struct for the source object
 type Source struct {
-	Name          string        `json:"name,omitempty"`
-	CatalogName   string        `json:"catalog_name,omitempty"`
-	Parent        string        `json:"parent,omitempty"`
-	WriteKeys     []string      `json:"write_keys,omitempty"`
-	LibraryConfig LibraryConfig `json:"library_config,omitempty"`
-	CreateTime    time.Time     `json:"create_time,omitempty"`
+	Name          string            `json:"name,omitempty"`
+	CatalogName   string            `json:"catalog_name,omitempty"`
+	Parent        string            `json:"parent,omitempty"`
+	WriteKeys     []string          `json:"write_keys,omitempty"`
+	Labels        map[string]string `json:"labels,omitempty"`
+	LibraryConfig LibraryConfig     `json:"library_config,omitempty"`
+	CreateTime    time.Time         `json:"create_time,omitempty"`
 }
 
 // LibraryConfig contains information about a source's library
@@ -57,4 +58,11 @@ type DestinationConfig struct {
 	DisplayName string      `json:"display_name,omitempty"`
 	Value       interface{} `json:"value,omitempty"`
 	Type        string      `json:"type,omitempty"`
+}
+
+type DestinationFilterActions struct {
+}
+type DestinationFilter struct {
+	Name string `json:"name,omitempty"`
+	If   string `json:"if,omitempty"`
 }

@@ -1,9 +1,9 @@
 package segment
 
 import (
-	SegmentApi "awesomeProject/segment/client"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	SegmentApi "segment-terraform/segment/client"
 )
 
 func resourceSegmentSource() *schema.Resource {
@@ -19,16 +19,28 @@ func resourceSegmentSource() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"is_dev": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  true,
+			},
+			"write_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 		Create: func(r *schema.ResourceData, meta interface{}) error {
 			client := meta.(*SegmentApi.Client)
 			name := r.Get("source_name").(string)
 			catalog := r.Get("catalog_name").(string)
+			isDev := r.Get("is_dev").(bool)
 
-			source, err := client.CreateSource(name, catalog)
+			source, err := client.CreateSource(name, catalog, isDev)
 			if err == nil {
 				r.SetId(source.Name)
-				r.Set("catalog_name", source.CatalogName)
+				_ = r.Set("catalog_name", source.CatalogName)
+				_ = r.Set("write_key", source.WriteKeys[0])
 				_, err = client.GetSource(name)
 			}
 			return err
@@ -52,7 +64,7 @@ func resourceSegmentSource() *schema.Resource {
 					return nil, fmt.Errorf("invalid source: %q; err: %v", r.Id(), err)
 				}
 				r.SetId(s.Name)
-				r.Set("catalog_name", s.CatalogName)
+				_ = r.Set("catalog_name", s.CatalogName)
 				return []*schema.ResourceData{r}, nil
 			},
 		},
