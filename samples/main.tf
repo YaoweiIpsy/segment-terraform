@@ -5,11 +5,22 @@ provider "segment" {
 locals {
   isDev = true
 }
-module "fanout" {
+module "yaowei-fanout" {
   source = "./components/fanout"
   function_name = "yaowei_segment_io"
-  events = ["hahah","asfdasdf"]
+  events = [
+    "hahah",
+    "asfdasdf"]
   name = "yaowei-test"
+}
+
+module "elaine-fanout" {
+  source = "./components/fanout"
+  function_name = "elaine_segment_io"
+  events = [
+    "hahah",
+    "asfdasdf"]
+  name = "elaine-test"
 }
 
 resource "segment_source" "event" {
@@ -25,7 +36,10 @@ resource "segment_destination" "test_destination" {
     {
       name = "repeatKeys"
       type = "list"
-      list = ["${module.fanout.fanout_write-key}"]
+      list = [
+        "${module.yaowei-fanout.fanout_write-key}",
+        "${module.elaine-fanout.fanout_write-key}"
+      ]
     },
   ]
 }

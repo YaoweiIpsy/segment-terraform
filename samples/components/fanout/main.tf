@@ -29,7 +29,8 @@ resource "segment_destination" "fanout_lambda" {
 resource "segment_destination_filter" "fanout_filter" {
   source_name = "${segment_destination.fanout_lambda.source_name}"
   destination_name = "${segment_destination.fanout_lambda.destination_name}"
-  condition = "event != \"${join("\" and event != \"", var.events)}\""    //"event != \"usms\" and event != \"usms_test\""
+  condition = "event != \"${join("\" and event != \"", var.events)}\""
+  //"event != \"usms\" and event != \"usms_test\""
   actions = [
     "{\"type\": \"drop_event\"}"
   ]
