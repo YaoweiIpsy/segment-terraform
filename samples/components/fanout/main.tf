@@ -2,6 +2,7 @@ resource "segment_source" "fanout_source" {
   source_name = "fanout-${var.isDev ? "staging": "prod"}-${var.name}"
   display_name = "<${var.isDev ? "staging": "prod"}>[fanout] - ${var.name}"
   catalog_name = "catalog/sources/java"
+  is_dev = "${var.isDev}"
 }
 
 resource "segment_destination" "fanout_lambda" {
