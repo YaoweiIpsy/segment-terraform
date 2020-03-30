@@ -1,0 +1,80 @@
+package segment
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	SegmentApi "segment-terraform/segment/client"
+)
+
+func resourceSegmentSource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"source_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"display_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "",
+			},
+			"catalog_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"is_dev": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  true,
+			},
+			"write_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+		Create: func(r *schema.ResourceData, meta interface{}) error {
+			client := meta.(*SegmentApi.Client)
+			name := r.Get("source_name").(string)
+			catalog := r.Get("catalog_name").(string)
+			isDev := r.Get("is_dev").(bool)
+			displayName := r.Get("display_name").(string)
+			if displayName == "" {
+				displayName = name
+			}
+			source, err := client.CreateSource(name, catalog, displayName, isDev)
+			if err == nil {
+				r.SetId(source.Name)
+				_ = r.Set("catalog_name", source.CatalogName)
+				_ = r.Set("write_key", source.WriteKeys[0])
+				_, err = client.GetSource(name)
+			}
+			return err
+		},
+		Read: func(r *schema.ResourceData, meta interface{}) error {
+			client := meta.(*SegmentApi.Client)
+			srcName := r.Get("source_name").(string)
+			_, err := client.GetSource(srcName)
+			return err
+		},
+		Delete: func(r *schema.ResourceData, meta interface{}) error {
+			client := meta.(*SegmentApi.Client)
+			srcName := r.Get("source_name").(string)
+			return client.DeleteSource(srcName)
+		},
+		Importer: &schema.ResourceImporter{
+			State: func(r *schema.ResourceData, meta interface{}) (data []*schema.ResourceData, err error) {
+				client := meta.(*SegmentApi.Client)
+				s, err := client.GetSource(r.Id())
+				if err != nil {
+					return nil, err
+				}
+				r.SetId(s.Name)
+				_ = r.Set("catalog_name", s.CatalogName)
+				return []*schema.ResourceData{r}, nil
+			},
+		},
+	}
+}
