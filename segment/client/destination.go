@@ -1,7 +1,9 @@
 package client
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 )
 
 func (client *Client) ListDestinations(srcName string) (Destinations, error) {
@@ -21,6 +23,11 @@ func (client *Client) GetDestination(srcName string, destName string) (Destinati
 }
 
 func (client *Client) CreateDestination(srcName, destName string, connectionMode string, enabled bool, configs ...DestinationConfig) (Destination, error) {
+	for index, config := range configs {
+		if !strings.HasPrefix(config.Name, "workspaces") {
+			configs[index].Name = fmt.Sprintf("workspaces/%s/sources/%s/destinations/%s/config/%s", client.workspace, srcName, destName, config.Name)
+		}
+	}
 	request := Request{
 		endpoint: "sources/" + srcName + "/destinations",
 		method:   http.MethodPost,
@@ -39,6 +46,12 @@ func (client *Client) CreateDestination(srcName, destName string, connectionMode
 	return *request.result.(*Destination), request.Do(client)
 }
 func (client *Client) UpdateDestination(srcName, destName string, enabled bool, configs ...DestinationConfig) (Destination, error) {
+	for index, config := range configs {
+		if !strings.HasPrefix(config.Name, "workspaces") {
+			configs[index].Name = fmt.Sprintf("workspaces/%s/sources/%s/destinations/%s/config/%s", client.workspace, srcName, destName, config.Name)
+		}
+	}
+
 	request := Request{
 		endpoint: "sources/" + srcName + "/destinations/" + destName,
 		method:   http.MethodPatch,
@@ -63,7 +76,7 @@ func (client *Client) UpdateDestination(srcName, destName string, enabled bool, 
 
 func (client *Client) DeleteDestination(srcName, destName string) error {
 	request := Request{
-		endpoint: "sources/" + srcName + "/destinations/" + destName,
+		endpoint: fmt.Sprintf("sources/%s/destinations/%s", srcName, destName),
 		method:   http.MethodDelete,
 	}
 	return request.Do(client)

@@ -40,7 +40,7 @@ func (client *Client) GetSource(name string) (Source, error) {
 	}
 	return *request.result.(*Source), request.Do(client)
 }
-func (client *Client) CreateSource(name string, catalog string, isDev bool) (Source, error) {
+func (client *Client) CreateSource(name string, catalog string, displayName string, isDev bool) (Source, error) {
 	if !strings.HasPrefix(name, "workspaces") {
 		name = fmt.Sprintf("workspaces/%s/sources/%s", client.workspace, name)
 	}
@@ -58,6 +58,7 @@ func (client *Client) CreateSource(name string, catalog string, isDev bool) (Sou
 			Source{
 				Name:        name,
 				CatalogName: catalog,
+				DisplayName: displayName,
 				Labels:      labels,
 			},
 		},

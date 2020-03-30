@@ -59,19 +59,20 @@ func (request *Request) Do(client *Client) error {
 
 	req.Header.Set("Authorization", "Bearer "+client.accessToken)
 	req.Header.Set("Content-Type", "application/json")
-	println(req.URL.String())
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode >= 300 {
-		data, _ := ioutil.ReadAll(resp.Body)
 		return fmt.Errorf("%s %s failed: %d - %s", req.Method, req.URL, resp.StatusCode, string(data))
 	}
 	if request.result == nil {
 		return nil
 	}
-	return json.NewDecoder(resp.Body).Decode(request.result)
+	return json.Unmarshal(data, request.result)
 }

@@ -26,8 +26,9 @@ func Provider() terraform.ResourceProvider {
 			return segmentApi.NewClient(d.Get("access_token").(string), d.Get("workspace").(string)), nil
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"segment_source":      resourceSegmentSource(),
-			"segment_destination": resourceSegmentDestination(),
+			"segment_source":             resourceSegmentSource(),
+			"segment_destination":        resourceSegmentDestination(),
+			"segment_destination_filter": resourceSegmentDestinationFilter(),
 		},
 	}
 }

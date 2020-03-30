@@ -20,6 +20,7 @@ type Sources struct {
 type Source struct {
 	Name          string            `json:"name,omitempty"`
 	CatalogName   string            `json:"catalog_name,omitempty"`
+	DisplayName   string            `json:"display_name,omitempty"`
 	Parent        string            `json:"parent,omitempty"`
 	WriteKeys     []string          `json:"write_keys,omitempty"`
 	Labels        map[string]string `json:"labels,omitempty"`
@@ -60,9 +61,24 @@ type DestinationConfig struct {
 	Type        string      `json:"type,omitempty"`
 }
 
-type DestinationFilterActions struct {
+type DestinationFilterAction struct {
+	Type   string `json:"type,omitempty"`
+	Fields map[string]struct {
+		Fields []string `json:"fields,omitempty"`
+	} `json:"fields"`
+	Percent int    `json:"percent,omitempty"`
+	Path    string `json:"path,omitempty"`
 }
+
 type DestinationFilter struct {
-	Name string `json:"name,omitempty"`
-	If   string `json:"if,omitempty"`
+	Name        string                    `json:"name"`
+	If          string                    `json:"if"`
+	Actions     []DestinationFilterAction `json:"actions"`
+	Title       string                    `json:"title"`
+	Description string                    `json:"description"`
+	Enabled     bool                      `json:"enabled"`
+}
+
+type DestinationFilters struct {
+	Filters []DestinationFilter `json:"filters,omitempty"`
 }
