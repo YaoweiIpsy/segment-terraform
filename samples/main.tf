@@ -1,5 +1,5 @@
 provider "segment" {
-  access_token = "XUnxSMBgMjJH4br4XcCrY0lk665OnpadBT6AUPFE4eQ.e2Lm6YK-zLTfpbqc0-ap7FEiKeKDacvLNMLdDaiPZqo"
+  access_token = "${var.token}"
   workspace = "ipsy-production"
 }
 locals {
