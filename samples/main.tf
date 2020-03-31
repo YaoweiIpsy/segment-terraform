@@ -12,6 +12,7 @@ module "yaowei-fanout" {
     "hahah",
     "asfdasdf"]
   name = "yaowei-test"
+  isDev = "${local.isDev}"
 }
 
 module "elaine-fanout" {
@@ -21,12 +22,15 @@ module "elaine-fanout" {
     "hahah",
     "asfdasdf"]
   name = "elaine-test"
+  isDev = "${local.isDev}"
 }
 
 resource "segment_source" "event" {
   source_name = "yaowei-source"
   display_name = "<${local.isDev ? "staging" : "prod"}> - Yaowei , test terraform"
   catalog_name = "catalog/sources/javascript"
+  is_dev = "${local.isDev}"
+
 }
 
 resource "segment_destination" "test_destination" {
